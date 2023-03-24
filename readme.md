@@ -1,7 +1,7 @@
-# Simple Website Check App
+# Simple Todo Check App
 ## RESTApi Server, HTTP Server, MySQL Server
 ---
-* This is a simple website checker (online / offline) that uses Go RESTApi Server, Go HTTP Server and MySql Server
+* This is a simple todo checker that uses Go RESTApi Server, Go HTTP Server and MySql Server
 * Each layer is structured so it can communicate in a simple manner:
 * MYSQL Server <-> RESTAPI Server <-> HTTP Server
 *
