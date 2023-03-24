@@ -1,0 +1,140 @@
+{{define "title"}}Edit Todo Item{{end}}
+
+{{define "content"}}
+<h3>Edit Todo Item</h3>
+<br>
+<a href="/admin" class="btn btn-default">Menu</a>
+
+<br>
+<br>
+
+<form name="mytodoitemformular" id="mytodoitemformular">
+  <select name="id" id="id" class="form-control" onchange="getData()" onfocus="this.selectedIndex = -1;">
+    <option value=""></option>
+  </select><br>
+  <label for="item">Item:</label><br>
+  <input type="text" id="item" name="item" value=""><br><br>
+  <label for="done">Done:</label><br>
+
+  <input type="submit" value="Update" class="btn btn-default">
+  <input type="reset" value="Reset" onclick="getAllTodo();resetAlert()" class="btn btn-default">
+</form>
+
+<div id="data" class="alert alert-warning"></div>
+
+<script>
+
+getAllTodo();
+
+async function getAllTodo() {
+
+    var adress = "";
+
+    $.getJSON('/configHtmlServer.json', function(data) {         
+        adress = data["adress"];
+    });
+
+    const response = await fetch(adress + '/todo/api/todos');
+
+    const data = await response.json();
+
+    var temp = "";
+
+    // make the list option
+
+    for(i = 0; i < data.length; i++)  
+    {
+            temp += "<option value='" + data[i].ID + "' >" + data[i].ID + " " + data[i].Item + "</option>";
+    }
+
+    if(temp == "") {
+        document.getElementById("id").outerHTML="<strong>There are no todo items in the database!</strong>";
+    } else {
+        document.getElementById("id").innerHTML=temp;
+    }
+
+}
+
+async function getData() {
+  
+  var adress = ""
+
+  $.getJSON('/configHtmlServer.json', function(data) {         
+      adress = data["adress"]
+  });
+
+  var id = document.getElementById('id').value;
+
+  const response = await fetch(adress + '/todo/api/todo/id/' + id);
+
+  const data = await response.json();
+
+  var temp = "";
+
+  if (data == "Todo item not found.") {
+    temp += "<p>Todo item not found.</p>";
+  }
+
+  else {
+
+    document.getElementById("item").value = data.Item;
+    
+  }
+
+    document.getElementById("data").innerHTML=temp;
+
+}
+
+  function convertFormToJSON(form) {
+    const array = $(form).serializeArray(); // Encodes the set of form elements as an array of names and values.
+    const json = {};
+    $.each(array, function () {
+      if(this.value) {
+        json[this.name] = this.value;
+        //json[this.name] = this.value || "";
+      }
+    });
+    return json;
+  }
+
+  function resetAlert() {
+        document.getElementById("data").innerHTML="";
+  }
+
+  $("#mytodoitemformular").on("submit", function (e) {
+    e.preventDefault();
+    const form = $(e.target);
+    const json = convertFormToJSON(form);
+    console.log(json);
+
+    var xhr = new XMLHttpRequest();
+    var url = "/todo/api/todo/edit";
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    // sanitize numbers for json object instead of strings
+
+    for(var prop in json){
+      if(json.hasOwnProperty(prop) && !isNaN(json[prop])){
+          json[prop] = +json[prop];   
+        }
+    }
+    
+    console.log(JSON.stringify(json, null, 2));
+
+    // transform json obj to text
+
+    var dataText = JSON.stringify(json) 
+
+    // alert(dataText)
+  
+    xhr.send(dataText);
+
+    //location.reload();
+
+    document.getElementById("data").innerHTML="The item has been changed.";
+
+  });
+
+</script>
+{{end}}

@@ -1,0 +1,74 @@
+{{define "title"}}Delete Todo Item by ID{{end}}
+
+{{define "content"}}
+<h3>Delete Todo Item by ID</h3>
+<br>
+<a href="/admin" class="btn btn-default">Menu</a>
+<br>
+<br>
+<br>
+<form name="mytodoitemformular" id="mytodoitemformular">
+  <label for="todo">Todo ID:</label><br>
+  <select name="todo" id="todo" class="form-control" onfocus="this.selectedIndex = -1;">
+    <option value=""></option>
+  </select>
+  <br><br>
+  <input type="submit" onclick="deleteByID()" value="Delete Todo Item" class="btn btn-default">
+  <input type="reset" value="Reset" class="btn btn-default">
+</form>
+
+<script>
+
+    getAllTodoItems();
+
+    async function getAllTodoItems() {
+
+        var adress = "";
+
+        $.getJSON('/configHtmlServer.json', function(data) {         
+            adress = data["adress"];
+        });
+
+        const response = await fetch(adress + '/todo/api/todos');
+
+        const data = await response.json();
+
+        var temp = "";
+
+        // make the list option
+
+        for(i = 0; i < data.length; i++)  
+        {
+                temp += "<option value='" + data[i].ID + "' >" + data[i].ID + " " + data[i].Item + "</option>";
+        }
+
+        if(temp == "") {
+            document.getElementById("todo").outerHTML="<strong>There are no todo items in the database!</strong>";
+        } else {
+            document.getElementById("todo").innerHTML=temp;
+        }
+
+    }
+
+    async function deleteByID() {
+
+        var adress = ""
+
+        $.getJSON('/configHtmlServer.json', function(data) {         
+            adress = data["adress"]
+        });
+
+        var id = document.getElementById('todo').value;
+
+        // console.log(document.getElementById('todo').value);
+
+        fetch(adress + '/todo/api/todo/deleteid/' + id, {
+             method: 'DELETE',
+            }).then(res => res.text()).then(res => console.log(res));
+
+        // refresh course list
+        getAllTodoItems();
+
+    }
+  </script>
+{{end}}
